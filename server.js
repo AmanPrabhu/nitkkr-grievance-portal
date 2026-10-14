@@ -236,6 +236,109 @@ app.get('/health', (req, res) => {
     res.status(200).json({ status: 'healthy', institute: 'NIT Kurukshetra Grievance Portal', uptime: process.uptime() });
 });
 
+// ================= ADMIN API ENDPOINTS =================
+const ADMIN_PIN = process.env.ADMIN_PIN || 'admin123';
+
+// Verify admin middleware helper
+function checkAdminAuth(req, res, next) {
+    const pin = req.headers['x-admin-pin'] || req.query.pin;
+    if (pin === ADMIN_PIN) {
+        return next();
+    }
+    return res.status(401).json({ success: false, error: 'Unauthorized: Invalid Admin PIN' });
+}
+
+// Admin verify login
+app.post('/api/admin/login', (req, res) => {
+    const { pin } = req.body;
+    if (pin === ADMIN_PIN) {
+        return res.json({ success: true, message: 'Authentication successful' });
+    }
+    return res.status(401).json({ success: false, error: 'Invalid PIN. Default is admin123' });
+});
+
+// Admin fetch all grievances
+app.get('/api/admin/grievances', checkAdminAuth, (req, res) => {
+    const query = `SELECT * FROM grievances ORDER BY timestamp DESC`;
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            console.error('Error fetching admin grievances:', err.message);
+            return res.status(500).json({ success: false, error: 'Database query failed' });
+        }
+        res.json({ success: true, grievances: rows });
+    });
+});
+
+// Admin update status and remarks
+app.patch('/api/admin/grievances/:id', checkAdminAuth, (req, res) => {
+    const rawId = req.params.id;
+    const { status, adminRemarks } = req.body;
+
+    const query = `UPDATE grievances SET status = ?, admin_remarks = ? WHERE LOWER(grievance_id) = LOWER(?)`;
+    db.run(query, [status, adminRemarks, rawId], function(err) {
+        if (err) {
+            console.error('Error updating grievance:', err.message);
+            return res.status(500).json({ success: false, error: 'Failed to update record' });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Grievance not found' });
+        }
+        res.json({ success: true, message: 'Grievance status updated successfully' });
+    });
+});
+
+// Admin Export to CSV
+app.get('/api/admin/export', checkAdminAuth, (req, res) => {
+    const query = `SELECT * FROM grievances ORDER BY timestamp DESC`;
+    db.all(query, [], (err, rows) => {
+        if (err) {
+            return res.status(500).send('Error generating export');
+        }
+
+        const headers = [
+            'Ticket ID', 'Date', 'Status', 'Priority', 'Category', 
+            'Student Name', 'Roll Number', 'Email', 'Phone',
+            'Program', 'Department', 'Year/Sem', 'Residence', 'Hostel', 'Room',
+            'Subject', 'Description', 'Admin Remarks'
+        ];
+
+        const csvRows = [headers.join(',')];
+
+        rows.forEach(r => {
+            const row = [
+                `"${r.grievance_id || ''}"`,
+                `"${r.timestamp || ''}"`,
+                `"${r.status || ''}"`,
+                `"${r.priority || ''}"`,
+                `"${(r.category || '').replace(/"/g, '""')}"`,
+                `"${r.is_anonymous ? 'Anonymous' : (r.student_name || '').replace(/"/g, '""')}"`,
+                `"${r.is_anonymous ? 'Confidential' : (r.roll_number || '')}"`,
+                `"${r.is_anonymous ? '' : (r.email || '')}"`,
+                `"${r.is_anonymous ? '' : (r.phone || '')}"`,
+                `"${r.program || ''}"`,
+                `"${(r.department || '').replace(/"/g, '""')}"`,
+                `"${r.year_semester || ''}"`,
+                `"${r.residence_type || ''}"`,
+                `"${r.hostel_name || ''}"`,
+                `"${r.room_number || ''}"`,
+                `"${(r.subject || '').replace(/"/g, '""')}"`,
+                `"${(r.description || '').replace(/"/g, '""').replace(/\n/g, ' ')}"`,
+                `"${(r.admin_remarks || '').replace(/"/g, '""')}"`
+            ];
+            csvRows.push(row.join(','));
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename="nitkkr_grievances.csv"');
+        res.send(csvRows.join('\n'));
+    });
+});
+
+// Admin shortcut route
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Fallback for non-API routes (SPA support)
 app.use((req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
