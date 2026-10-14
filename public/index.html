@@ -3,462 +3,378 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Grievance Portal — NIT Kurukshetra</title>
-    <meta name="description" content="Simple, secure student grievance and feedback submission portal for students of NIT Kurukshetra.">
+    <title>Admin Dashboard — Grievance Portal</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <style>
+        /* Admin specific enhancements */
+        .admin-nav {
+            background: #0f172a;
+            color: #ffffff;
+            border-bottom: none;
+        }
+        .admin-nav .brand-title {
+            color: #ffffff;
+        }
+        .admin-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .admin-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-outline-light {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-outline-light:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Login Gate */
+        .login-gate-card {
+            max-width: 400px;
+            margin: 60px auto;
+            text-align: center;
+            padding: 32px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        }
+        .login-gate-card input {
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 2px;
+            margin: 16px 0 12px;
+        }
+
+        /* Filter Row */
+        .filter-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .filter-row { grid-template-columns: 1fr; }
+        }
+
+        /* Complaints Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+        table.admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            text-align: left;
+        }
+        table.admin-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        table.admin-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        table.admin-table tr:hover {
+            background-color: #f8fafc;
+        }
+        .ticket-link {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        .priority-chip {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .priority-critical { background: #fee2e2; color: #b91c1c; }
+        .priority-urgent { background: #ffedd5; color: #c2410c; }
+        .priority-moderate { background: #e0f2fe; color: #0369a1; }
+        .priority-routine { background: #f1f5f9; color: #475569; }
+
+        .status-badge-admin {
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .status-submitted { background: #dbeafe; color: #1e40af; }
+        .status-review { background: #fef3c7; color: #b45309; }
+        .status-progress { background: #e0e7ff; color: #4338ca; }
+        .status-resolved { background: #dcfce7; color: #15803d; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 18px; right: 20px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .detail-group {
+            margin-bottom: 14px;
+        }
+        .detail-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+        .detail-val {
+            font-size: 14px;
+            color: #0f172a;
+        }
+        .desc-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .update-box {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
 </head>
 <body>
-    <!-- Top Simple App Navbar -->
-    <header class="app-navbar">
+    <!-- Top Admin Bar -->
+    <header class="app-navbar admin-nav">
         <div class="nav-container">
             <div class="brand">
-                <div class="brand-icon">
-                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                    </svg>
+                <div class="brand-icon" style="background: #334155;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg>
                 </div>
                 <div class="brand-info">
-                    <span class="brand-title">GrievancePortal</span>
-                    <span class="campus-chip">NIT Kurukshetra</span>
+                    <span class="brand-title">Admin Dashboard</span>
+                    <span class="admin-badge">Officer Access</span>
                 </div>
             </div>
 
-            <nav class="nav-links">
-                <button class="nav-tab active" data-tab="tab-lodge">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                    New Grievance
-                </button>
-                <button class="nav-tab" data-tab="tab-track">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                    Track Status
-                </button>
-                <button class="nav-tab" data-tab="tab-directory">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                    Campus Contacts
-                </button>
-            </nav>
+            <div class="admin-actions">
+                <a href="/" class="btn-outline-light" target="_blank" style="text-decoration: none;">View Portal</a>
+                <button type="button" id="exportBtn" class="btn-outline-light">Download CSV</button>
+                <button type="button" id="logoutBtn" class="btn-outline-light hidden">Log Out</button>
+            </div>
         </div>
     </header>
 
-    <main class="page-container">
-        <!-- Modern Hero Section -->
-        <section class="hero-section">
-            <div class="hero-badge">Student Support Portal • NIT Kurukshetra</div>
-            <h1>Have a campus issue? Let's get it resolved.</h1>
-            <p>Submit your concerns regarding hostels, academics, Wi-Fi, or facilities. You can submit with your student details or completely anonymously.</p>
+    <main class="page-container" style="max-width: 1100px;">
+        <!-- 1. LOGIN PIN GATE (If not logged in) -->
+        <div id="loginGate" class="login-gate-card">
+            <h3>Administrative Access</h3>
+            <p class="subtitle" style="margin-top: 6px;">Enter the Admin PIN to inspect student grievances.</p>
+            
+            <form id="loginForm">
+                <input type="password" id="adminPinInput" placeholder="Enter PIN" required autofocus>
+                <small class="error-msg" id="loginError" style="margin-bottom: 12px;"></small>
+                <button type="submit" class="primary-btn" style="width: 100%;">Unlock Dashboard</button>
+                <small style="display:block; margin-top: 12px; color: #94a3b8;">Default PIN: <code>admin123</code></small>
+            </form>
+        </div>
 
-            <div class="stats-pills">
+        <!-- 2. MAIN ADMIN CONTENT (Shown once authenticated) -->
+        <div id="adminContent" class="hidden">
+            <!-- Stats Row -->
+            <div class="stats-pills" style="justify-content: flex-start; margin-bottom: 24px;">
                 <div class="stat-pill">
-                    <span class="stat-num" id="statTotal">--</span>
-                    <span class="stat-desc">Tickets Logged</span>
+                    <span class="stat-num" id="totalCount">0</span>
+                    <span class="stat-desc">Total Submissions</span>
                 </div>
-                <div class="stat-pill">
-                    <span class="stat-num" id="statResolved">--</span>
+                <div class="stat-pill" style="border-left: 3px solid #ef4444;">
+                    <span class="stat-num" id="urgentCount" style="color: #ef4444;">0</span>
+                    <span class="stat-desc">Urgent / Critical</span>
+                </div>
+                <div class="stat-pill" style="border-left: 3px solid #f59e0b;">
+                    <span class="stat-num" id="pendingCount" style="color: #f59e0b;">0</span>
+                    <span class="stat-desc">Under Review / In Progress</span>
+                </div>
+                <div class="stat-pill" style="border-left: 3px solid #10b981;">
+                    <span class="stat-num" id="resolvedCount" style="color: #10b981;">0</span>
                     <span class="stat-desc">Resolved</span>
                 </div>
-                <div class="stat-pill">
-                    <span class="stat-num" id="statInProgress">--</span>
-                    <span class="stat-desc">In Progress</span>
+            </div>
+
+            <!-- Search & Filters -->
+            <div class="filter-row">
+                <input type="text" id="searchInput" placeholder="Search by Ticket ID, Student, Roll No, Keyword...">
+                <select id="statusFilter">
+                    <option value="ALL">All Statuses</option>
+                    <option value="Submitted">Submitted</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+                <select id="priorityFilter">
+                    <option value="ALL">All Priorities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="Urgent">Urgent</option>
+                    <option value="Moderate">Moderate</option>
+                    <option value="Routine">Routine</option>
+                </select>
+                <select id="categoryFilter">
+                    <option value="ALL">All Categories</option>
+                    <option value="Hostel">Hostel & Mess</option>
+                    <option value="Academic">Academics</option>
+                    <option value="Wi-Fi">Campus Wi-Fi / CCN</option>
+                    <option value="Anti-Ragging">Anti-Ragging</option>
+                    <option value="Health">Health Centre</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Complaints Table -->
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Date</th>
+                            <th>Priority</th>
+                            <th>Complainant</th>
+                            <th>Branch / Hostel</th>
+                            <th>Category & Subject</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grievanceTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #94a3b8; padding: 30px;">Loading grievances...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. DETAIL & ACTION MODAL -->
+        <div id="detailModal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <button type="button" class="modal-close" id="modalCloseBtn">&times;</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 id="modalTicketId" style="font-family: monospace; color: var(--primary);">NITKKR-GRV-...</h3>
+                    <span id="modalPriorityChip" class="priority-chip">Moderate</span>
+                </div>
+
+                <div class="grid-2">
+                    <div class="detail-group">
+                        <div class="detail-label">Complainant</div>
+                        <div class="detail-val" id="modalStudentName">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Roll Number</div>
+                        <div class="detail-val" id="modalRollNumber">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Email & Phone</div>
+                        <div class="detail-val" id="modalContact">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Program & Department</div>
+                        <div class="detail-val" id="modalDept">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Residence & Hostel</div>
+                        <div class="detail-val" id="modalResidence">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Date Submitted</div>
+                        <div class="detail-val" id="modalTimestamp">--</div>
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Category & Subject</div>
+                    <strong id="modalSubject" style="font-size: 15px; display: block; margin-top: 2px;">--</strong>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Full Description</div>
+                    <div class="desc-box" id="modalDescription">--</div>
+                </div>
+
+                <!-- Update Status Box -->
+                <div class="update-box">
+                    <h4 style="font-size: 14px; margin-bottom: 10px;">Update Grievance Status & Response</h4>
+                    <div class="form-group">
+                        <label for="updateStatusSelect">Status</label>
+                        <select id="updateStatusSelect">
+                            <option value="Submitted">Submitted (Received)</option>
+                            <option value="Under Review">Under Review (Assigned to authority)</option>
+                            <option value="In Progress">In Progress (Action being taken)</option>
+                            <option value="Resolved">Resolved (Matter Redressed & Closed)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateRemarksText">Official Remarks (Visible to student when they track)</label>
+                        <textarea id="updateRemarksText" rows="3" placeholder="e.g. Electrician visited and repaired geyser on 15 Oct..."></textarea>
+                    </div>
+                    <button type="button" id="saveStatusBtn" class="primary-btn" style="width: 100%;">Save Status & Notify Tracker</button>
                 </div>
             </div>
-        </section>
-
-        <!-- ================= TAB 1: LODGE GRIEVANCE ================= -->
-        <section id="tab-lodge" class="tab-panel active">
-            <div class="content-card">
-                <div class="card-header">
-                    <div>
-                        <h2>Submit a Grievance</h2>
-                        <p class="subtitle">Fill out the details below. Required fields are marked with an asterisk (*).</p>
-                    </div>
-                </div>
-
-                <form id="grievanceForm" novalidate>
-                    <!-- Ticket ID & Anonymous Toggle Box -->
-                    <div class="top-option-bar">
-                        <div class="ticket-id-preview">
-                            <span class="tiny-label">Ticket ID:</span>
-                            <span class="id-tag" id="ticketIdDisplay">NITKKR-GRV-...</span>
-                            <input type="hidden" id="grievanceId">
-                        </div>
-
-                        <div class="toggle-wrapper">
-                            <label class="switch">
-                                <input type="checkbox" id="anonToggle">
-                                <span class="slider round"></span>
-                            </label>
-                            <div class="toggle-text">
-                                <span class="toggle-title">Submit Anonymously</span>
-                                <span class="toggle-sub">Hide name & roll number</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 1. Student Details -->
-                    <div class="form-block" id="identitySection">
-                        <div class="block-title">
-                            <h3>1. Student Information</h3>
-                            <span class="mode-tag" id="anonStatusBadge">Visible</span>
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="studentName">Your Name <span class="req">*</span></label>
-                                <input type="text" id="studentName" placeholder="e.g. Rahul Sharma" required>
-                                <small class="error-msg" id="nameError"></small>
-                            </div>
-                            <div class="form-group">
-                                <label for="rollNumber">Roll Number <span class="req">*</span></label>
-                                <input type="text" id="rollNumber" placeholder="e.g. 12213045" required>
-                                <small class="error-msg" id="rollError"></small>
-                            </div>
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="email">Email Address <span class="req">*</span></label>
-                                <input type="email" id="email" placeholder="e.g. roll_no@nitkkr.ac.in or personal" required>
-                                <small class="error-msg" id="emailError"></small>
-                            </div>
-                            <div class="form-group">
-                                <label for="phone">Phone Number (Optional)</label>
-                                <input type="tel" id="phone" placeholder="e.g. 9876543210">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 2. Academic Info -->
-                    <div class="form-block">
-                        <div class="block-title">
-                            <h3>2. Academic Info</h3>
-                        </div>
-                        <div class="grid-3">
-                            <div class="form-group">
-                                <label for="program">Degree / Course <span class="req">*</span></label>
-                                <select id="program" required>
-                                    <option value="" disabled selected>Select course</option>
-                                    <option value="B.Tech">B.Tech</option>
-                                    <option value="M.Tech">M.Tech</option>
-                                    <option value="MCA">MCA</option>
-                                    <option value="MBA">MBA</option>
-                                    <option value="Ph.D.">Ph.D. / Scholar</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="department">Branch / Department <span class="req">*</span></label>
-                                <select id="department" required>
-                                    <option value="" disabled selected>Select department</option>
-                                    <option value="Computer Engineering">Computer Engineering (COE)</option>
-                                    <option value="Information Technology">Information Technology (IT)</option>
-                                    <option value="Electronics & Communication">Electronics & Communication (ECE)</option>
-                                    <option value="Electrical Engineering">Electrical Engineering (EE)</option>
-                                    <option value="Mechanical Engineering">Mechanical Engineering (ME)</option>
-                                    <option value="Civil Engineering">Civil Engineering (CE)</option>
-                                    <option value="Production & Industrial">Production & Industrial (PIE)</option>
-                                    <option value="Artificial Intelligence & DS">AI & Data Science</option>
-                                    <option value="Mathematics & Computing">Mathematics & Computing (MnC)</option>
-                                    <option value="VLSI & Embedded Systems">VLSI & Embedded Systems</option>
-                                    <option value="Renewable Energy">Renewable Energy</option>
-                                    <option value="Computer Applications">Computer Applications (MCA)</option>
-                                    <option value="Business Administration">Business Administration (MBA)</option>
-                                    <option value="Sciences / Humanities">Sciences / Humanities</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="yearSemester">Year / Semester <span class="req">*</span></label>
-                                <select id="yearSemester" required>
-                                    <option value="" disabled selected>Select year</option>
-                                    <option value="1st Year (Sem 1-2)">1st Year (Sem 1-2)</option>
-                                    <option value="2nd Year (Sem 3-4)">2nd Year (Sem 3-4)</option>
-                                    <option value="3rd Year (Sem 5-6)">3rd Year (Sem 5-6)</option>
-                                    <option value="4th Year (Sem 7-8)">4th Year (Sem 7-8)</option>
-                                    <option value="Postgraduate / PhD">Postgraduate / Ph.D.</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 3. Residence / Hostel -->
-                    <div class="form-block">
-                        <div class="block-title">
-                            <h3>3. Residence & Hostel</h3>
-                        </div>
-                        <div class="grid-3">
-                            <div class="form-group">
-                                <label for="residenceType">Accommodation <span class="req">*</span></label>
-                                <select id="residenceType" required>
-                                    <option value="Hostel Resident" selected>Hostel Resident</option>
-                                    <option value="Day Scholar">Day Scholar (Off-campus)</option>
-                                </select>
-                            </div>
-                            <div class="form-group" id="hostelSelectGroup">
-                                <label for="hostelName">Hostel <span class="req">*</span></label>
-                                <select id="hostelName">
-                                    <option value="" disabled selected>Select hostel</option>
-                                    <optgroup label="Boys Hostels">
-                                        <option value="Hostel No. 1">Hostel 1</option>
-                                        <option value="Hostel No. 2">Hostel 2</option>
-                                        <option value="Hostel No. 3">Hostel 3</option>
-                                        <option value="Hostel No. 4">Hostel 4</option>
-                                        <option value="Hostel No. 5">Hostel 5</option>
-                                        <option value="Hostel No. 6">Hostel 6</option>
-                                        <option value="Hostel No. 7">Hostel 7</option>
-                                        <option value="Hostel No. 8">Hostel 8</option>
-                                        <option value="Hostel No. 9">Hostel 9</option>
-                                        <option value="Hostel No. 10">Hostel 10</option>
-                                        <option value="Hostel No. 11 (Mega Boys)">Hostel 11 (Mega Boys Hostel)</option>
-                                    </optgroup>
-                                    <optgroup label="Girls Hostels">
-                                        <option value="Girls Hostel 1 (Alaknanda)">GH-1 (Alaknanda)</option>
-                                        <option value="Girls Hostel 2 (Bhagirathi)">GH-2 (Bhagirathi)</option>
-                                        <option value="Girls Hostel 3 (Cauvery)">GH-3 (Cauvery)</option>
-                                        <option value="Kalpana Chawla Girls Hostel (Mega GH)">Kalpana Chawla (Mega Girls Hostel)</option>
-                                    </optgroup>
-                                </select>
-                            </div>
-                            <div class="form-group" id="roomNoGroup">
-                                <label for="roomNumber">Room Number</label>
-                                <input type="text" id="roomNumber" placeholder="e.g. Room 210, Block B">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 4. Issue Description -->
-                    <div class="form-block">
-                        <div class="block-title">
-                            <h3>4. Issue Details</h3>
-                        </div>
-                        <div class="grid-2">
-                            <div class="form-group">
-                                <label for="category">Category <span class="req">*</span></label>
-                                <select id="category" required>
-                                    <option value="" disabled selected>Select category</option>
-                                    <option value="Hostel & Mess Facilities">Hostel & Mess (Food, Water, Electricity, Washrooms)</option>
-                                    <option value="Academic & Examination">Academics & Exams (Schedule, Attendance, Grading)</option>
-                                    <option value="Faculty & Departmental Affairs">Faculty & Course Work</option>
-                                    <option value="Campus IT & Wi-Fi (CCN)">Campus Wi-Fi & Hostel LAN (CCN)</option>
-                                    <option value="Fees, Accounts & Scholarships">Scholarships & Accounts (NSP, Fee receipts)</option>
-                                    <option value="Training & Placement (T&P)">Training & Placement (T&P Cell)</option>
-                                    <option value="Health Centre & Medical Facilities">Health Centre & Medical Facility</option>
-                                    <option value="Anti-Ragging & Harassment">Anti-Ragging / Harassment concern</option>
-                                    <option value="Mental Health & Psychological Support">Counseling & Mental Health</option>
-                                    <option value="Sports & Campus Infrastructure">Sports, Gym & Infrastructure</option>
-                                    <option value="General Administration">Other / General Issue</option>
-                                </select>
-                                <small class="error-msg" id="categoryError"></small>
-                            </div>
-                            <div class="form-group">
-                                <label for="priority">Priority</label>
-                                <select id="priority">
-                                    <option value="Routine">Low — Routine suggestion or inquiry</option>
-                                    <option value="Moderate" selected>Medium — Standard issue</option>
-                                    <option value="Urgent">High — Urgent (Impacting daily routine/exams)</option>
-                                    <option value="Critical">Critical — Immediate safety / Emergency</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="subject">Subject / Title <span class="req">*</span></label>
-                            <input type="text" id="subject" placeholder="Brief 1-line summary of the problem" required>
-                            <small class="error-msg" id="subjectError"></small>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="description">Detailed Description <span class="req">*</span></label>
-                            <textarea id="description" rows="5" placeholder="Explain the problem clearly with relevant dates, locations, or details..." required></textarea>
-                            <div class="desc-footer">
-                                <small class="error-msg" id="descError"></small>
-                                <span class="char-count" id="charCounter">0 / 2000 characters</span>
-                            </div>
-                        </div>
-
-                        <div class="check-group">
-                            <label class="check-container">
-                                <input type="checkbox" id="declaration" required>
-                                <span>I confirm that the details provided are accurate and submitted in good faith.</span>
-                            </label>
-                            <small class="error-msg" id="declarationError"></small>
-                        </div>
-                    </div>
-
-                    <div class="form-buttons">
-                        <button type="submit" id="submitBtn" class="primary-btn">
-                            <span class="btn-text">Submit Grievance</span>
-                            <span class="btn-spinner hidden"></span>
-                        </button>
-                    </div>
-                </form>
-
-                <!-- Success Box -->
-                <div id="submissionResult" class="success-box hidden">
-                    <div class="success-top">
-                        <div class="check-circle">✓</div>
-                        <div>
-                            <h3>Grievance Submitted Successfully</h3>
-                            <p>Your ticket has been recorded. Save your ticket ID to check progress.</p>
-                        </div>
-                    </div>
-                    <div class="ticket-info-card">
-                        <div class="info-line">
-                            <span>Ticket ID:</span>
-                            <strong id="registeredTicketId" class="ticket-code">NITKKR-GRV-...</strong>
-                        </div>
-                        <div class="info-line">
-                            <span>Department / Category:</span>
-                            <span id="registeredDept">General</span>
-                        </div>
-                        <div class="info-line">
-                            <span>Status:</span>
-                            <span class="badge blue">Submitted</span>
-                        </div>
-                    </div>
-                    <div class="action-row">
-                        <button type="button" class="secondary-btn" id="copyTicketBtn">Copy Ticket ID</button>
-                        <button type="button" class="primary-btn" id="trackNowBtn">Track Ticket Now</button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= TAB 2: TRACK STATUS ================= -->
-        <section id="tab-track" class="tab-panel hidden">
-            <div class="content-card">
-                <div class="card-header">
-                    <h2>Track Your Ticket</h2>
-                    <p class="subtitle">Enter your reference ticket ID to check updates and administrative replies.</p>
-                </div>
-
-                <div class="search-bar">
-                    <input type="text" id="trackSearchInput" placeholder="Enter Ticket ID (e.g. NITKKR-GRV-...)">
-                    <button type="button" id="trackSubmitBtn" class="primary-btn">Search</button>
-                </div>
-                <small class="error-msg" id="trackError"></small>
-
-                <div id="trackResultCard" class="track-card hidden">
-                    <div class="track-card-header">
-                        <div>
-                            <span class="tag" id="trackCategory">Category</span>
-                            <h3 id="trackSubject">Issue Subject</h3>
-                            <p class="timestamp" id="trackTimestamp">Logged on --</p>
-                        </div>
-                        <div class="status-badge" id="trackStatusBadge">Submitted</div>
-                    </div>
-
-                    <!-- Progress Stepper -->
-                    <div class="stepper">
-                        <div class="step-item active" id="step1">
-                            <div class="step-dot">1</div>
-                            <span>Received</span>
-                        </div>
-                        <div class="step-bar" id="line1"></div>
-                        <div class="step-item" id="step2">
-                            <div class="step-dot">2</div>
-                            <span>Under Review</span>
-                        </div>
-                        <div class="step-bar" id="line2"></div>
-                        <div class="step-item" id="step3">
-                            <div class="step-dot">3</div>
-                            <span>In Progress</span>
-                        </div>
-                        <div class="step-bar" id="line3"></div>
-                        <div class="step-item" id="step4">
-                            <div class="step-dot">4</div>
-                            <span>Resolved</span>
-                        </div>
-                    </div>
-
-                    <!-- Metadata Table -->
-                    <div class="meta-row">
-                        <div class="meta-item">
-                            <label>Ticket ID</label>
-                            <span id="trackIdVal">--</span>
-                        </div>
-                        <div class="meta-item">
-                            <label>Student</label>
-                            <span id="trackApplicantVal">--</span>
-                        </div>
-                        <div class="meta-item">
-                            <label>Department</label>
-                            <span id="trackDeptVal">--</span>
-                        </div>
-                        <div class="meta-item">
-                            <label>Hostel / Place</label>
-                            <span id="trackHostelVal">--</span>
-                        </div>
-                        <div class="meta-item">
-                            <label>Priority</label>
-                            <span id="trackPriorityVal">--</span>
-                        </div>
-                    </div>
-
-                    <!-- Remarks -->
-                    <div class="reply-box">
-                        <strong>Official Remarks / Status Update:</strong>
-                        <p id="trackRemarksVal">No updates yet.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ================= TAB 3: CONTACTS ================= -->
-        <section id="tab-directory" class="tab-panel hidden">
-            <div class="content-card">
-                <div class="card-header">
-                    <h2>Important NIT Kurukshetra Contacts</h2>
-                    <p class="subtitle">Quick reference numbers for campus services, hostels, and medical assistance.</p>
-                </div>
-
-                <div class="contact-grid">
-                    <div class="contact-box urgent">
-                        <h4>Anti-Ragging Helpline</h4>
-                        <p>24x7 Student Safety & Proctorial cell</p>
-                        <div class="phone-link">Toll-Free: 1800-180-5522</div>
-                    </div>
-
-                    <div class="contact-box">
-                        <h4>Health Centre / Dispensary</h4>
-                        <p>Campus medical centre & ambulance</p>
-                        <div class="phone-link">+91-1744-233280</div>
-                    </div>
-
-                    <div class="contact-box">
-                        <h4>Hostel Chief Warden</h4>
-                        <p>Hostel amenities, food & water issues</p>
-                        <div class="phone-link">Boys: 233301 | Girls: 233302</div>
-                    </div>
-
-                    <div class="contact-box">
-                        <h4>Campus Security</h4>
-                        <p>Main gate security & emergency control</p>
-                        <div class="phone-link">+91-1744-233510</div>
-                    </div>
-
-                    <div class="contact-box">
-                        <h4>CCN (Campus Wi-Fi / LAN)</h4>
-                        <p>Internet and network credentials support</p>
-                        <div class="phone-link">+91-1744-233515</div>
-                    </div>
-
-                    <div class="contact-box">
-                        <h4>Student Counseling</h4>
-                        <p>Mental wellbeing & confidential counseling</p>
-                        <div class="phone-link">+91-1744-233522</div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        </div>
     </main>
 
-    <!-- Normal, clean footer -->
-    <footer class="app-footer">
-        <div class="footer-container">
-            <p><strong>Student Grievance Portal</strong> • A platform for students of NIT Kurukshetra</p>
-            <p class="footer-sub">Report issues responsibly. In case of immediate physical emergency or ragging, contact the campus security or helpline directly. • <a href="/admin" style="color: inherit; text-decoration: underline;">Admin Portal</a></p>
-        </div>
-    </footer>
-
-    <script src="script.js"></script>
+    <script src="admin.js"></script>
 </body>
 </html>
