@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — Grievance Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Admin specific enhancements */
+        .admin-nav {
+            background: #0f172a;
+            color: #ffffff;
+            border-bottom: none;
+        }
+        .admin-nav .brand-title {
+            color: #ffffff;
+        }
+        .admin-badge {
+            background: #ef4444;
+            color: white;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+        .admin-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .btn-outline-light {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 6px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-outline-light:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Login Gate */
+        .login-gate-card {
+            max-width: 400px;
+            margin: 60px auto;
+            text-align: center;
+            padding: 32px;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+        }
+        .login-gate-card input {
+            text-align: center;
+            font-size: 18px;
+            letter-spacing: 2px;
+            margin: 16px 0 12px;
+        }
+
+        /* Filter Row */
+        .filter-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 768px) {
+            .filter-row { grid-template-columns: 1fr; }
+        }
+
+        /* Complaints Table */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: #ffffff;
+        }
+        table.admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+            text-align: left;
+        }
+        table.admin-table th {
+            background: #f8fafc;
+            color: #475569;
+            font-weight: 700;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border);
+            white-space: nowrap;
+        }
+        table.admin-table td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f1f5f9;
+            vertical-align: middle;
+        }
+        table.admin-table tr:hover {
+            background-color: #f8fafc;
+        }
+        .ticket-link {
+            font-family: monospace;
+            font-weight: 700;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        .priority-chip {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+        .priority-critical { background: #fee2e2; color: #b91c1c; }
+        .priority-urgent { background: #ffedd5; color: #c2410c; }
+        .priority-moderate { background: #e0f2fe; color: #0369a1; }
+        .priority-routine { background: #f1f5f9; color: #475569; }
+
+        .status-badge-admin {
+            font-size: 11.5px;
+            font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        .status-submitted { background: #dbeafe; color: #1e40af; }
+        .status-review { background: #fef3c7; color: #b45309; }
+        .status-progress { background: #e0e7ff; color: #4338ca; }
+        .status-resolved { background: #dcfce7; color: #15803d; }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        .modal-card {
+            background: #ffffff;
+            border-radius: 12px;
+            max-width: 650px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            box-shadow: 0 20px 25px -5px rgba(0,0,0,0.2);
+            position: relative;
+        }
+        .modal-close {
+            position: absolute;
+            top: 18px; right: 20px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #64748b;
+        }
+        .detail-group {
+            margin-bottom: 14px;
+        }
+        .detail-label {
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #64748b;
+            margin-bottom: 2px;
+        }
+        .detail-val {
+            font-size: 14px;
+            color: #0f172a;
+        }
+        .desc-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            padding: 12px 14px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            line-height: 1.5;
+            white-space: pre-wrap;
+        }
+        .update-box {
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Admin Bar -->
+    <header class="app-navbar admin-nav">
+        <div class="nav-container">
+            <div class="brand">
+                <div class="brand-icon" style="background: #334155;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a10 10 0 1 0 10 10H12V2z"/></svg>
+                </div>
+                <div class="brand-info">
+                    <span class="brand-title">Admin Dashboard</span>
+                    <span class="admin-badge">Officer Access</span>
+                </div>
+            </div>
+
+            <div class="admin-actions">
+                <a href="/" class="btn-outline-light" target="_blank" style="text-decoration: none;">View Portal</a>
+                <button type="button" id="exportBtn" class="btn-outline-light">Download CSV</button>
+                <button type="button" id="logoutBtn" class="btn-outline-light hidden">Log Out</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="page-container" style="max-width: 1100px;">
+        <!-- 1. LOGIN PIN GATE (If not logged in) -->
+        <div id="loginGate" class="login-gate-card">
+            <h3>Administrative Access</h3>
+            <p class="subtitle" style="margin-top: 6px;">Enter the Admin PIN to inspect student grievances.</p>
+            
+            <form id="loginForm">
+                <input type="password" id="adminPinInput" placeholder="Enter PIN" required autofocus>
+                <small class="error-msg" id="loginError" style="margin-bottom: 12px;"></small>
+                <button type="submit" class="primary-btn" style="width: 100%;">Unlock Dashboard</button>
+                <small style="display:block; margin-top: 12px; color: #94a3b8;">Default PIN: <code>admin123</code></small>
+            </form>
+        </div>
+
+        <!-- 2. MAIN ADMIN CONTENT (Shown once authenticated) -->
+        <div id="adminContent" class="hidden">
+            <!-- Stats Row -->
+            <div class="stats-pills" style="justify-content: flex-start; margin-bottom: 24px;">
+                <div class="stat-pill">
+                    <span class="stat-num" id="totalCount">0</span>
+                    <span class="stat-desc">Total Submissions</span>
+                </div>
+                <div class="stat-pill" style="border-left: 3px solid #ef4444;">
+                    <span class="stat-num" id="urgentCount" style="color: #ef4444;">0</span>
+                    <span class="stat-desc">Urgent / Critical</span>
+                </div>
+                <div class="stat-pill" style="border-left: 3px solid #f59e0b;">
+                    <span class="stat-num" id="pendingCount" style="color: #f59e0b;">0</span>
+                    <span class="stat-desc">Under Review / In Progress</span>
+                </div>
+                <div class="stat-pill" style="border-left: 3px solid #10b981;">
+                    <span class="stat-num" id="resolvedCount" style="color: #10b981;">0</span>
+                    <span class="stat-desc">Resolved</span>
+                </div>
+            </div>
+
+            <!-- Search & Filters -->
+            <div class="filter-row">
+                <input type="text" id="searchInput" placeholder="Search by Ticket ID, Student, Roll No, Keyword...">
+                <select id="statusFilter">
+                    <option value="ALL">All Statuses</option>
+                    <option value="Submitted">Submitted</option>
+                    <option value="Under Review">Under Review</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+                <select id="priorityFilter">
+                    <option value="ALL">All Priorities</option>
+                    <option value="Critical">Critical</option>
+                    <option value="Urgent">Urgent</option>
+                    <option value="Moderate">Moderate</option>
+                    <option value="Routine">Routine</option>
+                </select>
+                <select id="categoryFilter">
+                    <option value="ALL">All Categories</option>
+                    <option value="Hostel">Hostel & Mess</option>
+                    <option value="Academic">Academics</option>
+                    <option value="Wi-Fi">Campus Wi-Fi / CCN</option>
+                    <option value="Anti-Ragging">Anti-Ragging</option>
+                    <option value="Health">Health Centre</option>
+                    <option value="Other">Other</option>
+                </select>
+            </div>
+
+            <!-- Complaints Table -->
+            <div class="table-responsive">
+                <table class="admin-table">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Date</th>
+                            <th>Priority</th>
+                            <th>Complainant</th>
+                            <th>Branch / Hostel</th>
+                            <th>Category & Subject</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="grievanceTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; color: #94a3b8; padding: 30px;">Loading grievances...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. DETAIL & ACTION MODAL -->
+        <div id="detailModal" class="modal-overlay hidden">
+            <div class="modal-card">
+                <button type="button" class="modal-close" id="modalCloseBtn">&times;</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3 id="modalTicketId" style="font-family: monospace; color: var(--primary);">NITKKR-GRV-...</h3>
+                    <span id="modalPriorityChip" class="priority-chip">Moderate</span>
+                </div>
+
+                <div class="grid-2">
+                    <div class="detail-group">
+                        <div class="detail-label">Complainant</div>
+                        <div class="detail-val" id="modalStudentName">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Roll Number</div>
+                        <div class="detail-val" id="modalRollNumber">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Email & Phone</div>
+                        <div class="detail-val" id="modalContact">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Program & Department</div>
+                        <div class="detail-val" id="modalDept">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Residence & Hostel</div>
+                        <div class="detail-val" id="modalResidence">--</div>
+                    </div>
+                    <div class="detail-group">
+                        <div class="detail-label">Date Submitted</div>
+                        <div class="detail-val" id="modalTimestamp">--</div>
+                    </div>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Category & Subject</div>
+                    <strong id="modalSubject" style="font-size: 15px; display: block; margin-top: 2px;">--</strong>
+                </div>
+
+                <div class="detail-group">
+                    <div class="detail-label">Full Description</div>
+                    <div class="desc-box" id="modalDescription">--</div>
+                </div>
+
+                <!-- Update Status Box -->
+                <div class="update-box">
+                    <h4 style="font-size: 14px; margin-bottom: 10px;">Update Grievance Status & Response</h4>
+                    <div class="form-group">
+                        <label for="updateStatusSelect">Status</label>
+                        <select id="updateStatusSelect">
+                            <option value="Submitted">Submitted (Received)</option>
+                            <option value="Under Review">Under Review (Assigned to authority)</option>
+                            <option value="In Progress">In Progress (Action being taken)</option>
+                            <option value="Resolved">Resolved (Matter Redressed & Closed)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="updateRemarksText">Official Remarks (Visible to student when they track)</label>
+                        <textarea id="updateRemarksText" rows="3" placeholder="e.g. Electrician visited and repaired geyser on 15 Oct..."></textarea>
+                    </div>
+                    <button type="button" id="saveStatusBtn" class="primary-btn" style="width: 100%;">Save Status & Notify Tracker</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin.js"></script>
+</body>
+</html>
