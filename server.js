@@ -287,6 +287,33 @@ app.patch('/api/admin/grievances/:id', checkAdminAuth, (req, res) => {
     });
 });
 
+// Admin Delete single grievance
+app.delete('/api/admin/grievances/:id', checkAdminAuth, (req, res) => {
+    const rawId = req.params.id;
+    const query = `DELETE FROM grievances WHERE LOWER(grievance_id) = LOWER(?)`;
+    db.run(query, [rawId], function(err) {
+        if (err) {
+            console.error('Error deleting grievance:', err.message);
+            return res.status(500).json({ success: false, error: 'Failed to delete record' });
+        }
+        if (this.changes === 0) {
+            return res.status(404).json({ success: false, error: 'Grievance not found' });
+        }
+        res.json({ success: true, message: `Grievance ${rawId} deleted successfully` });
+    });
+});
+
+// Admin Delete all grievances (bulk reset)
+app.delete('/api/admin/grievances-all', checkAdminAuth, (req, res) => {
+    db.run(`DELETE FROM grievances`, function(err) {
+        if (err) {
+            console.error('Error clearing grievances:', err.message);
+            return res.status(500).json({ success: false, error: 'Failed to clear records' });
+        }
+        res.json({ success: true, message: 'All grievances deleted successfully' });
+    });
+});
+
 // Admin Export to CSV
 app.get('/api/admin/export', checkAdminAuth, (req, res) => {
     const query = `SELECT * FROM grievances ORDER BY timestamp DESC`;
