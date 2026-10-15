@@ -212,8 +212,9 @@
             </div>
 
             <div class="admin-actions">
-                <a href="/" class="btn-outline-light" target="_blank" style="text-decoration: none;">View Portal</a>
+                <a href="/" class="btn-outline-light" style="text-decoration: none;">← Student Portal</a>
                 <button type="button" id="exportBtn" class="btn-outline-light">Download CSV</button>
+                <button type="button" id="clearAllBtn" class="btn-outline-light" style="border-color: #ef4444; color: #fca5a5;">Clear All Data</button>
                 <button type="button" id="logoutBtn" class="btn-outline-light hidden">Log Out</button>
             </div>
         </div>
@@ -230,6 +231,9 @@
                 <small class="error-msg" id="loginError" style="margin-bottom: 12px;"></small>
                 <button type="submit" class="primary-btn" style="width: 100%;">Unlock Dashboard</button>
                 <small style="display:block; margin-top: 12px; color: #94a3b8;">Default PIN: <code>admin123</code></small>
+                <div style="margin-top: 18px; border-top: 1px solid var(--border); padding-top: 14px;">
+                    <a href="/" style="font-size: 13px; font-weight: 600; color: #2563eb; text-decoration: none;">← Go to Student Grievance Form</a>
+                </div>
             </form>
         </div>
 
@@ -369,7 +373,10 @@
                         <label for="updateRemarksText">Official Remarks (Visible to student when they track)</label>
                         <textarea id="updateRemarksText" rows="3" placeholder="e.g. Electrician visited and repaired geyser on 15 Oct..."></textarea>
                     </div>
-                    <button type="button" id="saveStatusBtn" class="primary-btn" style="width: 100%;">Save Status & Notify Tracker</button>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button type="button" id="saveStatusBtn" class="primary-btn" style="flex: 2;">Save Status & Notify Tracker</button>
+                        <button type="button" id="deleteEntryBtn" class="secondary-btn" style="flex: 1; color: #ef4444; border-color: #fca5a5; font-weight: 600;">Delete Entry</button>
+                    </div>
                 </div>
             </div>
         </div>
