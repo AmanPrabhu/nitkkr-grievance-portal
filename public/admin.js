@@ -98,6 +98,16 @@ function setupEventListeners() {
 
     // Save Status Update
     document.getElementById('saveStatusBtn').addEventListener('click', saveStatusUpdate);
+
+    // Delete Current Entry (from Modal)
+    document.getElementById('deleteEntryBtn').addEventListener('click', () => {
+        if (currentEditingId) {
+            deleteGrievance(currentEditingId);
+        }
+    });
+
+    // Clear All Entries (Bulk)
+    document.getElementById('clearAllBtn').addEventListener('click', clearAllGrievances);
 }
 
 // Fetch all grievances from server
@@ -174,9 +184,14 @@ function renderTable(list) {
                 </td>
                 <td><span class="status-badge-admin ${statusClass}">${escapeHtml(g.status || 'Submitted')}</span></td>
                 <td>
-                    <button type="button" class="secondary-btn" style="padding: 4px 10px; font-size: 12px;" onclick="openDetailModal('${g.grievance_id}')">
-                        Manage
-                    </button>
+                    <div style="display: flex; gap: 6px;">
+                        <button type="button" class="secondary-btn" style="padding: 4px 8px; font-size: 12px;" onclick="openDetailModal('${g.grievance_id}')">
+                            Manage
+                        </button>
+                        <button type="button" class="secondary-btn" style="padding: 4px 8px; font-size: 12px; color: #ef4444; border-color: #fca5a5;" onclick="deleteGrievance('${g.grievance_id}')">
+                            Delete
+                        </button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -289,6 +304,54 @@ async function saveStatusUpdate() {
     } finally {
         saveBtn.disabled = false;
         saveBtn.textContent = 'Save Status & Notify Tracker';
+    }
+}
+
+async function deleteGrievance(ticketId) {
+    if (!confirm(`Are you sure you want to permanently delete ticket ${ticketId}?`)) {
+        return;
+    }
+
+    const pin = getStoredPin();
+    try {
+        const res = await fetch(`/api/admin/grievances/${encodeURIComponent(ticketId)}`, {
+            method: 'DELETE',
+            headers: { 'x-admin-pin': pin }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            closeModal();
+            loadGrievances(); // Refresh list
+        } else {
+            alert(data.error || 'Failed to delete grievance.');
+        }
+    } catch (err) {
+        alert('Network error while deleting.');
+    }
+}
+
+async function clearAllGrievances() {
+    const confirmation = prompt('⚠️ DANGER: You are about to permanently delete ALL grievance records from the database.\n\nType "DELETE" below to confirm:');
+    if (confirmation !== 'DELETE') {
+        alert('Action canceled. Nothing was deleted.');
+        return;
+    }
+
+    const pin = getStoredPin();
+    try {
+        const res = await fetch('/api/admin/grievances-all', {
+            method: 'DELETE',
+            headers: { 'x-admin-pin': pin }
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            alert('All grievance records have been deleted.');
+            loadGrievances(); // Refresh list
+        } else {
+            alert(data.error || 'Failed to clear grievances.');
+        }
+    } catch (err) {
+        alert('Network error while clearing database.');
     }
 }
 
